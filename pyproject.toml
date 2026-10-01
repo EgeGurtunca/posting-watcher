@@ -1,0 +1,15 @@
+[project]
+name = "posting-watcher"
+version = "0.1.0"
+description = "Watches internship posting mails, reads them with a local LLM, sends the technical ones to Telegram."
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools]
+packages = ["watcher"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
