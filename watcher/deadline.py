@@ -23,7 +23,7 @@ NUMERIC = re.compile(r"\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b")
 WORDS = re.compile(rf"(?:\b(\d{{1,2}})\s+)?\b({_alternation(MONTHS)})\b(?:\s+(\d{{4}}))?(?:\s+({_alternation(WEEKDAYS)})\b)?")
 
 
-def _lower(text: str) -> str:
+def tr_lower(text: str) -> str:
     # str.lower() turns "SALI" into "sali" and "İ" into "i" plus a combining dot; Turkish needs ı and i.
     return text.replace("I", "ı").replace("İ", "i").lower()
 
@@ -48,7 +48,7 @@ def _first_weekday(weekday: int, month: int, received: date) -> date | None:
 def parse_deadline(text: str | None, received: date) -> date | None:
     if not text:
         return None
-    t = _lower(text)
+    t = tr_lower(text)
     if m := NUMERIC.search(t):
         d = date(int(m[3]), int(m[2]), int(m[1]))
     elif m := WORDS.search(t):

@@ -1,0 +1,54 @@
+{"n": 1, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-09-27", "note": "IT: setup, end-user support, hardware"}
+{"n": 2, "notify": false, "kind": "coop", "technical": false, "mode": "physical", "deadline": "2026-09-25", "note": "insurance operations"}
+{"n": 3, "notify": false, "kind": "program", "technical": false, "mode": "online", "deadline": "2026-10-18", "note": "general career-skills programme"}
+{"n": 4, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-09-25"}
+{"n": 5, "notify": false, "kind": "coop", "technical": false, "mode": "physical", "deadline": "2026-09-25", "note": "leasing operations"}
+{"n": 6, "notify": false, "kind": null, "note": "welcome mail, no opening"}
+{"n": 7, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-09-21", "note": "ERP, master data, user support, testing"}
+{"n": 8, "notify": true, "kind": "program", "technical": true, "mode": null, "deadline": null, "note": "engineering-track defence programmes; the mail does not describe their content", "borderline": true}
+{"n": 9, "notify": false, "kind": "coop", "technical": false, "mode": "online", "deadline": "2026-09-20", "note": "B2B sales; remote only in the body"}
+{"n": 10, "notify": true, "kind": "program", "technical": true, "mode": "online", "deadline": "2026-10-25", "borderline": true, "note": "career programme whose project part is solving a problem with AI tools"}
+{"n": 11, "notify": true, "kind": "coop", "technical": true, "mode": "hybrid", "deadline": "2026-09-18", "borderline": true, "note": "customer success, but the work is system integration and data analysis"}
+{"n": 12, "notify": false, "kind": "coop", "technical": false, "mode": "physical", "deadline": "2026-09-18", "note": "service operations, ERP data entry"}
+{"n": 13, "notify": false, "kind": "coop", "technical": false, "mode": null, "deadline": "2026-09-17", "note": "automotive content writing"}
+{"n": 14, "notify": true, "kind": "coop", "technical": true, "mode": "hybrid", "deadline": "2026-09-13", "note": "data analytics"}
+{"n": 15, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-09-11"}
+{"n": 16, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-09-10", "note": "hardware and end-user support"}
+{"n": 17, "notify": false, "kind": "coop", "technical": false, "mode": "physical", "deadline": "2026-09-09", "note": "corporate communication; day number missing in the deadline"}
+{"n": 18, "notify": false, "kind": "coop", "technical": false, "mode": "physical", "deadline": "2026-09-09", "note": "occupational safety"}
+{"n": 19, "notify": false, "kind": "job", "technical": false, "mode": null, "deadline": "2026-09-23", "note": "management trainee programme"}
+{"n": 20, "notify": false, "kind": "coop", "technical": false, "mode": "physical", "deadline": "2026-09-03", "note": "title says computer engineering; the work is e-commerce listings, SEO and content (I first labelled it from the title)"}
+{"n": 21, "notify": false, "kind": "job", "technical": false, "mode": null, "deadline": "2026-09-23", "note": "reminder of 19"}
+{"n": 22, "notify": true, "kind": "coop", "technical": true, "mode": null, "deadline": "2026-09-02", "borderline": true, "note": "'business analysis' title, but SDLC, SQL, Git, APIs, testing: an IT analyst role"}
+{"n": 23, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-08-30"}
+{"n": 24, "notify": true, "kind": "internship", "technical": true, "mode": null, "deadline": "2026-09-09", "note": "software, test, support roles"}
+{"n": 25, "notify": false, "kind": "coop", "technical": false, "mode": "hybrid", "deadline": "2026-08-30", "note": "partner sales and marketing"}
+{"n": 26, "notify": true, "kind": "coop", "technical": true, "mode": null, "deadline": "2026-08-27", "note": "customer data analytics; location says Online/Fiziksel"}
+{"n": 27, "notify": false, "kind": "internship", "technical": false, "mode": null, "deadline": "2026-08-28", "note": "general long-term internship"}
+{"n": 28, "notify": false, "kind": "program", "technical": false, "mode": "hybrid", "deadline": null, "note": "sustainability programme"}
+{"n": 29, "notify": false, "kind": "program", "technical": false, "mode": null, "deadline": null, "note": "poster only; the mail text is a link"}
+{"n": 30, "notify": true, "kind": "program", "technical": true, "mode": "physical", "deadline": "2026-09-11", "note": "generative AI hackathon; deadline only in the subject"}
+{"n": 31, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-08-16", "borderline": true, "note": "vehicle telemetry systems: tests and integrations, but mostly field operations"}
+{"n": 32, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-08-16"}
+{"n": 33, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-08-16"}
+{"n": 34, "notify": false, "kind": "coop", "technical": false, "mode": "physical", "deadline": "2026-08-14", "note": "factory operations; day number missing in the deadline"}
+{"n": 35, "notify": false, "kind": "coop", "technical": false, "mode": "physical", "deadline": "2026-08-13", "note": "programmatic advertising: ad-tech platforms, but media-buying work", "borderline": true}
+{"n": 36, "notify": false, "kind": "internship", "technical": false, "mode": null, "deadline": null, "note": "marketplace category team"}
+{"n": 37, "notify": false, "kind": "internship", "technical": false, "mode": null, "deadline": null, "note": "only a link"}
+{"n": 38, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-08-11"}
+{"n": 39, "notify": false, "kind": "coop", "technical": false, "mode": "physical", "deadline": "2026-08-06"}
+{"n": 40, "notify": false, "kind": "coop", "technical": false, "mode": "physical", "deadline": "2026-08-02", "note": "'Yazılım' in the subject, but the job is IT recruitment"}
+{"n": 41, "notify": true, "kind": "coop", "technical": true, "mode": "hybrid", "deadline": "2026-07-23", "note": "machine learning R&D"}
+{"n": 42, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-07-22", "note": "QA testing"}
+{"n": 43, "notify": false, "kind": "program", "technical": false, "mode": "physical", "deadline": null, "note": "one-day career training"}
+{"n": 44, "notify": true, "kind": "coop", "technical": true, "mode": "physical", "deadline": "2026-07-19"}
+{"n": 45, "notify": false, "kind": "coop", "technical": false, "mode": "online", "deadline": "2026-07-19", "note": "design and content"}
+{"n": 46, "notify": true, "kind": "coop", "technical": true, "mode": "online", "deadline": "2026-07-19", "note": "the one I missed"}
+{"n": 47, "notify": false, "kind": "coop", "technical": false, "mode": "hybrid", "deadline": "2026-07-16", "note": "sales analysis in Excel"}
+{"n": 48, "notify": true, "kind": "coop", "technical": true, "mode": "hybrid", "deadline": "2026-07-16", "note": "system integration"}
+{"n": 49, "notify": false, "kind": "coop", "technical": false, "mode": null, "deadline": "2026-07-16", "note": "intellectual property; 'hybrid or online'"}
+{"n": 50, "notify": false, "kind": "program", "technical": false, "mode": null, "deadline": "2026-07-15", "borderline": true, "note": "defence-industry summer school for all faculties"}
+{"n": 51, "notify": false, "kind": "internship", "technical": false, "mode": null, "deadline": null, "note": "HR, supply, sales"}
+{"n": 52, "notify": false, "kind": null, "note": "image only"}
+{"n": 53, "notify": false, "kind": null, "note": "image only"}
+{"n": 54, "notify": false, "kind": null, "note": "image only"}
