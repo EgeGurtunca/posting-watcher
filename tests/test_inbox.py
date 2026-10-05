@@ -22,10 +22,10 @@ def write_eml(folder, name, *, subject="COOP:// X - IT Cooper", sender="Coop <co
 
 
 def test_reads_headers_and_the_plain_body(tmp_path):
-    m = read_eml(write_eml(tmp_path, "a.eml", plain="Merhaba,\nLokasyon: Maslak", html="<p>ignored</p>"))
+    m = read_eml(write_eml(tmp_path, "a.eml", plain="Merhaba,\nLokasyon: Levent", html="<p>ignored</p>"))
     assert (m.message_id, m.sender, m.subject) == ("<a1@bau>", "coop@coop.bau.edu.tr", "COOP:// X - IT Cooper")
     assert m.received == datetime(2026, 9, 23, 13, 48, tzinfo=timezone.utc)
-    assert "Lokasyon: Maslak" in m.text and "ignored" not in m.text
+    assert "Lokasyon: Levent" in m.text and "ignored" not in m.text
 
 
 def test_html_only_mail_becomes_readable_text(tmp_path):
