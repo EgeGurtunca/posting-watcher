@@ -13,3 +13,4 @@ packages = ["watcher"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]  # plain `pytest` (as in CI) does not put the repo root on sys.path; `python -m pytest` does
