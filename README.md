@@ -1,5 +1,7 @@
 # posting-watcher
 
+![tests](https://github.com/EgeGurtunca/posting-watcher/actions/workflows/test.yml/badge.svg)
+
 Reads the internship postings that land in my inbox, decides which ones are technical, and sends those to
 my phone on Telegram, with the deadline and how to apply. Everything runs on my laptop with a local model.
 
