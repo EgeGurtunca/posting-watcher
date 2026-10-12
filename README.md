@@ -109,7 +109,9 @@ on mails I marked borderline. It is the default.
 
 ## Running it
 
-1. Install [Ollama](https://ollama.com) and `ollama pull gemma4:12b` (7.6 GB). No Python packages are needed.
+1. Install [Ollama](https://ollama.com) and `ollama pull gemma4:12b` (7.6 GB). No Python packages are needed. On Windows, if
+   `python` opens the Microsoft Store instead, turn off its alias (Settings > Apps > Advanced app settings > App
+   execution aliases) or run Python by its full path.
 2. Make a Telegram bot with @BotFather, copy `.env.example` to `.env` and put the token in. Send the bot any
    message, run `python -m watcher.notify` to print your chat id, add it to `.env`, and run it again: a test
    message arrives.
