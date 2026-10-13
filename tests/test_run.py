@@ -106,3 +106,16 @@ def test_load_env_reads_key_values_and_ignores_comments(tmp_path, monkeypatch):
 def test_when_says_today_and_tomorrow():
     assert notify.when(date(2026, 9, 25), date(2026, 9, 25)).endswith("(bugün)")
     assert notify.when(date(2026, 9, 26), date(2026, 9, 25)) == "26 Eylül Cmt (yarın)"
+
+
+def test_long_messages_are_cut_to_telegrams_limit(monkeypatch):
+    import io, json, urllib.parse
+    sent = {}
+    def fake_urlopen(url, data, timeout):
+        sent.update(urllib.parse.parse_qs(data.decode()))
+        return io.BytesIO(json.dumps({"ok": True}).encode())
+    monkeypatch.setenv("TELEGRAM_TOKEN", "t")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "1")
+    monkeypatch.setattr(notify.urllib.request, "urlopen", fake_urlopen)
+    notify.send("x" * 10_000)
+    assert len(sent["text"][0]) <= notify.MAX_CHARS and sent["text"][0].endswith("(kısaltıldı)")

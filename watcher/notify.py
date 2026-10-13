@@ -14,7 +14,12 @@ MONTHS = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağ
 DAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
 
 
+MAX_CHARS = 4096  # Telegram rejects longer messages; a busy day's digest could pass it
+
+
 def send(text: str) -> None:
+    if len(text) > MAX_CHARS:
+        text = text[:MAX_CHARS - 20].rstrip() + "\n(kısaltıldı)"
     data = urllib.parse.urlencode({"chat_id": os.environ["TELEGRAM_CHAT_ID"], "text": text,
                                    "disable_web_page_preview": "true"}).encode()
     url = API.format(token=os.environ["TELEGRAM_TOKEN"], method="sendMessage")
