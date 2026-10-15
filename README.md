@@ -140,11 +140,11 @@ is `data/watcher.db`.
 pytest
 ```
 
-37 tests, no network: every deadline phrasing from the three months of mail, the notify rule, reading
+38 tests, no network: every deadline phrasing from the three months of mail, the notify rule, reading
 plain and HTML-only `.eml` files, the extraction schema, the baseline, the eval scoring, and the run loop with
 fakes for the model and Telegram (a posting is notified once, a crash leaves the mail unread for the next
 run, a missing folder is an error, the model is not started when there is no new mail, the digest and the
-heartbeat go out once).
+heartbeat go out once, a message longer than Telegram's 4096-character limit is cut instead of refused).
 
 ## What's next
 
