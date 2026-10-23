@@ -51,5 +51,6 @@ def read_eml(path: Path) -> Mail:
 
 
 def new_mails(folder: Path, seen: set[str]) -> list[Mail]:
-    mails = [read_eml(p) for p in folder.glob("*.eml")]
-    return sorted((m for m in mails if m.message_id not in seen), key=lambda m: m.received)
+    # one mail saved twice (a flow test, a retry) has two files but one Message-ID: read it once, notify once
+    mails = {m.message_id: m for m in map(read_eml, folder.glob("*.eml"))}
+    return sorted((m for m in mails.values() if m.message_id not in seen), key=lambda m: m.received)

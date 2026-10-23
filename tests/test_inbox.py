@@ -44,3 +44,9 @@ def test_new_mails_skips_seen_ones_and_sorts_by_time(tmp_path):
     write_eml(tmp_path, "old.eml", message_id="<old>", plain="x")
     (tmp_path / "notes.txt").write_text("not a mail")
     assert [m.message_id for m in new_mails(tmp_path, seen={"<old>"})] == ["<early>", "<late>"]
+
+
+def test_the_same_mail_saved_twice_is_read_once(tmp_path):
+    write_eml(tmp_path, "20261023-122350-a.eml", plain="x")
+    write_eml(tmp_path, "20261023-124011-b.eml", plain="x")
+    assert [m.message_id for m in new_mails(tmp_path, seen=set())] == ["<a1@bau>"]
