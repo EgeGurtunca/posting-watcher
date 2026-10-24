@@ -30,7 +30,7 @@ SQLite · Telegram Bot API · pytest
 ```
 school mailbox ──Power Automate──► <time>-<guid>.eml, as an attachment ──► a Gmail used only for this
 
-Task Scheduler, every 15 min ──► python -m watcher.run
+Task Scheduler, every hour ──► python -m watcher.run
    unread bridge mails ──IMAP──► their .eml attachments into the watch folder
    new .eml from a known sender? ──► start Ollama ──► gemma4 lists the postings in the mail
        each posting: company, title, kind, technical, mode, location, pay, deadline sentence, how to apply
@@ -136,12 +136,12 @@ on mails I marked borderline. It is the default.
    `GMAIL_APP_PASSWORD` and a local `WATCH_FOLDER` (it is created on the first run) in `.env`. If you would
    rather sync a OneDrive folder, have the flow "Create file" there instead, leave the Gmail lines out and point
    `WATCH_FOLDER` at the synced folder.
-5. Run every 15 minutes and at logon, with `pythonw` so no console window flashes:
+5. Run every hour and at logon, with `pythonw` so no console window flashes:
 
 ```powershell
 $py = "$env:LOCALAPPDATA\Programs\Python\Python312\pythonw.exe"
 $action = New-ScheduledTaskAction -Execute $py -Argument "-m watcher.run" -WorkingDirectory (Get-Location)
-$triggers = @((New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 15)),
+$triggers = @((New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Hours 1)),
               (New-ScheduledTaskTrigger -AtLogOn))
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 Register-ScheduledTask -TaskName "posting-watcher" -Action $action -Trigger $triggers -Settings $settings

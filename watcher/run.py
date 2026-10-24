@@ -1,4 +1,4 @@
-"""One pass, run every 15 minutes by Windows Task Scheduler: python -m watcher.run
+"""One pass, run every hour by Windows Task Scheduler: python -m watcher.run
 
 Reads new mail files, notifies technical postings, sends the 21:00 digest and the Monday heartbeat, and
 turns any failure into a Telegram alert, because a watcher that fails silently looks exactly like a quiet week.
@@ -44,7 +44,8 @@ def ollama():
     """Start Ollama only when there is mail to read, and stop it only if this run started it."""
     proc = None
     if not _ollama_up():
-        proc = subprocess.Popen(["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))  # no console pop-up under pythonw
         for _ in range(30):
             if _ollama_up():
                 break
@@ -97,7 +98,7 @@ def heartbeat(store: Store, now: datetime) -> None:
 
 def alert(store: Store, now: datetime, err: Exception) -> None:
     key, day = f"alert:{type(err).__name__}", now.date().isoformat()
-    if store.get(key) != day:  # at most one alert per kind of failure per day, not one every 15 minutes
+    if store.get(key) != day:  # at most one alert per kind of failure per day, not one every hour
         notify.send(f"⚠️ posting-watcher çalışmadı: {type(err).__name__}: {str(err)[:300]}")
         store.set(key, day)
 
