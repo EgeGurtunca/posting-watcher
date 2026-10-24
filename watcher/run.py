@@ -9,7 +9,7 @@ import time
 import traceback
 import urllib.request
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from watcher import extract, gmail, llm, notify
@@ -18,6 +18,7 @@ from watcher.inbox import Mail, new_mails
 from watcher.rules import should_notify
 from watcher.store import Store
 
+IS_WINDOWS = os.name == "nt"
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 DIGEST_HOUR = 21
@@ -56,7 +57,16 @@ def ollama():
         yield
     finally:
         if proc:
-            proc.terminate()
+            stop(proc)
+
+
+def stop(proc: subprocess.Popen) -> None:
+    """Stop `ollama serve` with its llama-server children: terminate() alone left them holding 8 GB of VRAM."""
+    if IS_WINDOWS:
+        subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True,
+                       creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    else:
+        proc.terminate()
 
 
 def process(mail: Mail, store: Store, now: datetime) -> None:
@@ -71,15 +81,26 @@ def process(mail: Mail, store: Store, now: datetime) -> None:
     store.save(mail, rows, now)
 
 
+def model_due(now: datetime) -> bool:
+    """READ_AFTER=21 in .env: posting mails wait until 21:00, so the GPU stays free all day. Unset: every run."""
+    after = os.environ.get("READ_AFTER", "").strip()
+    return not after or now.hour >= int(after)
+
+
 def digest(store: Store, now: datetime) -> None:
     day = now.date().isoformat()
-    if now.hour < DIGEST_HOUR or store.get("digest") == day:
+    if now.hour < DIGEST_HOUR or not model_due(now) or store.get("digest") == day:
         return
     rows = store.postings_on(now.date())
     if rows:
-        hits = [r for r in rows if r[3]]
-        notify.send("\n".join([f"📋 Bugünün özeti: {len(hits)} teknik ilan, {len(rows) - len(hits)} diğer"]
-                              + [f"• {notify.KIND[kind]} · {title} · {company}" for kind, title, company, _ in hits]))
+        hits, others = [r for r in rows if r[3]], [r for r in rows if not r[3]]
+        lines = [f"📋 Bugünün özeti: {len(hits)} teknik ilan, {len(others)} diğer"]
+        for kind, title, company, _, mode, deadline in hits:
+            lines += ["", f"🆕 {notify.KIND[kind]} · {title} · {company}", f"📍 {notify.MODE[mode]}"
+                      + (f" · ⏰ son gün: {notify.when(date.fromisoformat(deadline), now.date())}" if deadline else "")]
+        if others:
+            lines += ["", "Diğer:"] + [f"• {notify.KIND[kind]} · {title} · {company}" for kind, title, company, *_ in others]
+        notify.send("\n".join(lines))
     store.set("digest", day)
 
 
@@ -111,7 +132,7 @@ def run_once(store: Store, folder: Path, senders: set[str], now: datetime) -> No
         if m.sender not in senders:
             store.save(m, [], now)
     ours = [m for m in mails if m.sender in senders]
-    if ours:
+    if ours and model_due(now):  # not due: they stay unread and wait for the evening run
         with ollama():
             for m in ours:
                 process(m, store, now)

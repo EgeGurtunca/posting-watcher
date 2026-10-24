@@ -29,8 +29,8 @@ class Store:
                             (mail.message_id, mail.received.isoformat(), mail.subject, now.isoformat()))
 
     def postings_on(self, day: date) -> list[tuple]:
-        return self.db.execute("select kind, title, company, notified from postings where processed like ? "
-                               "order by notified desc", (day.isoformat() + "%",)).fetchall()
+        return self.db.execute("select kind, title, company, notified, mode, deadline from postings "
+                               "where processed like ? order by notified desc", (day.isoformat() + "%",)).fetchall()
 
     def counts_since(self, day: date) -> tuple[int, int, int]:
         mails = self.db.execute("select count(*) from mails where processed >= ?", (day.isoformat(),)).fetchone()[0]

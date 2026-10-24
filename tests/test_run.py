@@ -76,14 +76,27 @@ def test_alerts_go_out_once_per_kind_per_day(env):
 def test_digest_after_21_once_and_only_with_postings(env):
     inbox, store, sent = env
     write_eml(inbox, "a.eml", subject="COOP:// Örnek - IT Cooper", sender=COOP, plain="x")
+    write_eml(inbox, "b.eml", subject="COOP:// Örnek - Operasyon", sender=COOP, message_id="<b@bau>", plain="x")
     run.run_once(store, inbox, {COOP}, NOW)
     sent.clear()
     run.digest(store, NOW.replace(hour=20))
     run.digest(store, NOW.replace(hour=21))
     run.digest(store, NOW.replace(hour=22))
-    assert sent == ["📋 Bugünün özeti: 1 teknik ilan, 0 diğer\n• CO-OP · IT Cooper · Örnek Lojistik"]
+    assert sent == ["📋 Bugünün özeti: 1 teknik ilan, 1 diğer\n\n"
+                    "🆕 CO-OP · IT Cooper · Örnek Lojistik\n📍 fiziksel · ⏰ son gün: 25 Eylül Cum (2 gün var)\n\n"
+                    "Diğer:\n• CO-OP · IT Cooper · Örnek Lojistik"]
     run.digest(store, NOW.replace(hour=21) + timedelta(days=1))  # a day without postings: no message
     assert len(sent) == 1
+
+
+def test_read_after_21_keeps_posting_mails_waiting_until_the_evening(env, monkeypatch):
+    inbox, store, sent = env
+    monkeypatch.setenv("READ_AFTER", "21")
+    write_eml(inbox, "a.eml", subject="COOP:// Örnek - IT Cooper", sender=COOP, plain="x")
+    run.run_once(store, inbox, {COOP}, NOW)  # 17:00: fetched, not read
+    assert sent == [] and store.seen() == set()
+    run.run_once(store, inbox, {COOP}, NOW.replace(hour=21, minute=11))
+    assert sent[0].startswith("🆕 CO-OP · IT Cooper") and sent[1].startswith("📋 Bugünün özeti: 1 teknik ilan")
 
 
 def test_monday_heartbeat_once_and_it_warns_when_nothing_arrived(env):
@@ -106,6 +119,14 @@ def test_load_env_reads_key_values_and_ignores_comments(tmp_path, monkeypatch):
 def test_when_says_today_and_tomorrow():
     assert notify.when(date(2026, 9, 25), date(2026, 9, 25)).endswith("(bugün)")
     assert notify.when(date(2026, 9, 26), date(2026, 9, 25)) == "26 Eylül Cmt (yarın)"
+
+
+def test_ollama_is_stopped_with_its_children_on_windows(monkeypatch):
+    calls = []
+    monkeypatch.setattr(run, "IS_WINDOWS", True)
+    monkeypatch.setattr(run.subprocess, "run", lambda cmd, **kw: calls.append(cmd))
+    run.stop(type("Proc", (), {"pid": 42})())
+    assert calls == [["taskkill", "/PID", "42", "/T", "/F"]]
 
 
 def test_long_messages_are_cut_to_telegrams_limit(monkeypatch):

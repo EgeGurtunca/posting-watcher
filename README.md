@@ -76,7 +76,9 @@ that does not exist returns nothing, which is exactly what a broken sync would l
 marked read only after its file is on disk; every failure, a rejected Gmail login included, sends an alert;
 and the Monday heartbeat warns when no mail file has arrived for seven days, which catches a broken flow even
 when nothing crashes. Ollama is started only when there is a mail to read and
-stopped again afterwards, so the GPU stays idle the rest of the time.
+stopped again afterwards, so the GPU stays idle the rest of the time. The first version only terminated
+`ollama serve`; on Windows its `llama-server` child survived and held 8 GB of VRAM until I looked at
+`nvidia-smi`. It now stops the whole process tree.
 
 ## Evaluation
 
@@ -150,19 +152,25 @@ Register-ScheduledTask -TaskName "posting-watcher" -Action $action -Trigger $tri
 Run it from the repo folder. Errors also go to `data/watcher.log`, and the database of what was read and sent
 is `data/watcher.db`.
 
+To keep the GPU free during the day, put `READ_AFTER=21` in `.env`: the hourly runs still fetch the mail, but
+posting mails wait until the first run after 21:00, which reads them all with one model load, sends the
+messages and then the digest. Remove the line to go back to reading every hour.
+
 ## Tests
 
 ```bash
 pytest
 ```
 
-42 tests, no network: every deadline phrasing from the three months of mail, the notify rule, reading
+44 tests, no network: every deadline phrasing from the three months of mail, the notify rule, reading
 plain and HTML-only `.eml` files (a subject folded the Exchange way, the same mail saved twice, read once),
 the Gmail bridge against a fake IMAP server (attachments saved before the mail is marked read, only `.eml`
 files, no file names that escape the folder), the extraction schema, the baseline, the eval scoring, and the
 run loop with fakes for the model and Telegram (a posting is notified once, a crash leaves the mail unread
-for the next run, a missing folder is an error, the model is not started when there is no new mail, the digest and the
-heartbeat go out once, a message longer than Telegram's 4096-character limit is cut instead of refused).
+for the next run, a missing folder is an error, the model is not started when there is no new mail,
+`READ_AFTER` keeps posting mails waiting until the evening, the digest and the heartbeat go out once, a
+message longer than Telegram's 4096-character limit is cut instead of refused, Ollama is stopped with its
+children).
 
 ## What's next
 
