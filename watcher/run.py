@@ -12,7 +12,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from watcher import extract, llm, notify
+from watcher import extract, gmail, llm, notify
 from watcher.deadline import parse_deadline
 from watcher.inbox import Mail, new_mails
 from watcher.rules import should_notify
@@ -128,7 +128,10 @@ def main() -> None:
             f.write(f"{now.isoformat()}\n{traceback.format_exc()}\n")
 
     try:
-        run_once(store, Path(os.environ["WATCH_FOLDER"]), senders, now)  # KeyError if unset: an alert, not "."
+        folder = Path(os.environ["WATCH_FOLDER"])  # KeyError if unset: an alert, not "."
+        if os.environ.get("GMAIL_USER"):
+            gmail.fetch(folder)  # IMAP or login failures land in the alert below like any other
+        run_once(store, folder, senders, now)
     except Exception as err:
         log()
         try:

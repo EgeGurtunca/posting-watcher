@@ -22,15 +22,16 @@ ones are [bau-mevzuat-rag](https://github.com/EgeGurtunca/bau-mevzuat-rag) (retr
 unglamorous parts of putting a model in front of real data: getting the data in, structured extraction,
 deciding in code, and failing loudly.
 
-**Stack:** Python 3.12 (standard library only) · Ollama (`gemma4:12b`) · Power Automate + OneDrive ·
+**Stack:** Python 3.12 (standard library only) · Ollama (`gemma4:12b`) · Power Automate · Gmail over IMAP ·
 SQLite · Telegram Bot API · pytest
 
 ## How it works
 
 ```
-school mailbox ──Power Automate──► OneDrive/PostingWatcher/<time>-<guid>.eml ──OneDrive sync──► laptop
+school mailbox ──Power Automate──► <time>-<guid>.eml, as an attachment ──► a Gmail used only for this
 
 Task Scheduler, every 15 min ──► python -m watcher.run
+   unread bridge mails ──IMAP──► their .eml attachments into the watch folder
    new .eml from a known sender? ──► start Ollama ──► gemma4 lists the postings in the mail
        each posting: company, title, kind, technical, mode, location, pay, deadline sentence, how to apply
    ──► the code decides: technical, and a co-op, internship or programme, and the deadline has not passed
@@ -39,11 +40,21 @@ Task Scheduler, every 15 min ──► python -m watcher.run
    any failure ──► an alert (at most one per kind of failure per day)
 ```
 
-**Getting the mail.** The plan was Microsoft Graph with my own app registration, but my university's
-Microsoft 365 tenant returns 401 on the Entra portal, so students cannot register apps. A Power Automate flow
-in the same tenant can read my mail, though: "When a new email arrives" from the CO-OP address, "Export
-email", "Create file" in OneDrive. The OneDrive app syncs that one folder to the laptop, and reading mail
-becomes reading files with the standard library's `email` package. No tokens in my code, no mailbox login.
+**Getting the mail.** This took more attempts than anything else. The plan was Microsoft Graph with my own
+app registration, but my university's Microsoft 365 tenant returns 401 on the Entra portal, so students
+cannot register apps. A Power Automate flow in the same tenant can read my mail, though: "When a new email
+arrives" from the CO-OP address, then "Export email", which gives the whole mail as one `.eml`. Getting that
+file onto the laptop was the hard part:
+
+- OneDrive: "Create file" works, but then the OneDrive app has to run on the laptop all the time to sync it.
+- rclone, to copy just that folder: the tenant asks for admin consent, so no.
+- My Outlook.com address: Microsoft turned off password logins for IMAP, and OAuth means an app registration again.
+- A Gmail account used only for this: the flow mails each `.eml` to it as an attachment, and
+  [watcher/gmail.py](watcher/gmail.py) copies the attachments into the watch folder with `imaplib`. One app
+  password in `.env`, for an inbox that holds nothing else. This is what runs.
+
+From there, reading mail is reading files with the standard library's `email` package. The flow still saves
+a copy to OneDrive, which doubles as an archive.
 
 **The model reads, the code decides.** The model fills in a fixed set of fields, and Ollama's structured
 outputs constrain its answer to a JSON schema, so it cannot return broken JSON or a kind outside the list.
@@ -61,9 +72,10 @@ the weekday match; Turkish needs its own lowercasing.
 
 **Failing loudly.** A watcher that fails silently looks exactly like a quiet week, and a quiet week is when I
 would stop checking. So: a missing watch folder is an error, not an empty inbox (`Path.glob` on a folder
-that does not exist returns nothing, which is exactly what an unsynced OneDrive would look like); every
-failure sends an alert; and the Monday heartbeat warns when no mail file has arrived for seven days, which
-catches a broken flow even when nothing crashes. Ollama is started only when there is a mail to read and
+that does not exist returns nothing, which is exactly what a broken sync would look like); a bridge mail is
+marked read only after its file is on disk; every failure, a rejected Gmail login included, sends an alert;
+and the Monday heartbeat warns when no mail file has arrived for seven days, which catches a broken flow even
+when nothing crashes. Ollama is started only when there is a mail to read and
 stopped again afterwards, so the GPU stays idle the rest of the time.
 
 ## Evaluation
@@ -117,9 +129,13 @@ on mails I marked borderline. It is the default.
    message arrives.
 3. In Power Automate (make.powerautomate.com), create an automated cloud flow: trigger "When a new email
    arrives (V3)" with From set to the senders you want, then "Export email (V2)" with the trigger's Message
-   Id, then OneDrive for Business "Create file" in `/PostingWatcher` with the file name
-   `concat(formatDateTime(utcNow(),'yyyyMMdd-HHmmss'),'-',guid(),'.eml')` and the exported body as content.
-4. Sync that folder with the OneDrive app and put its local path in `.env` as `WATCH_FOLDER`.
+   Id, then "Send an email (V2)" to a Gmail account you keep for this, with the subject `posting-watcher` and
+   one attachment: name `concat(formatDateTime(utcNow(),'yyyyMMdd-HHmmss'),'-',guid(),'.eml')`, content
+   `body('Export_email_(V2)')` (the action's name in your flow's language).
+4. Turn on 2-step verification for that Gmail account, create an app password, and put `GMAIL_USER`,
+   `GMAIL_APP_PASSWORD` and a local `WATCH_FOLDER` (it is created on the first run) in `.env`. If you would
+   rather sync a OneDrive folder, have the flow "Create file" there instead, leave the Gmail lines out and point
+   `WATCH_FOLDER` at the synced folder.
 5. Run every 15 minutes and at logon, with `pythonw` so no console window flashes:
 
 ```powershell
@@ -140,10 +156,12 @@ is `data/watcher.db`.
 pytest
 ```
 
-39 tests, no network: every deadline phrasing from the three months of mail, the notify rule, reading
-plain and HTML-only `.eml` files (and the same mail saved twice, read once), the extraction schema, the
-baseline, the eval scoring, and the run loop with fakes for the model and Telegram (a posting is notified once, a crash leaves the mail unread for the next
-run, a missing folder is an error, the model is not started when there is no new mail, the digest and the
+42 tests, no network: every deadline phrasing from the three months of mail, the notify rule, reading
+plain and HTML-only `.eml` files (a subject folded the Exchange way, the same mail saved twice, read once),
+the Gmail bridge against a fake IMAP server (attachments saved before the mail is marked read, only `.eml`
+files, no file names that escape the folder), the extraction schema, the baseline, the eval scoring, and the
+run loop with fakes for the model and Telegram (a posting is notified once, a crash leaves the mail unread
+for the next run, a missing folder is an error, the model is not started when there is no new mail, the digest and the
 heartbeat go out once, a message longer than Telegram's 4096-character limit is cut instead of refused).
 
 ## What's next

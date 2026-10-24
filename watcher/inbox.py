@@ -1,7 +1,7 @@
-"""New mails from the folder a Power Automate flow fills with one .eml file per mail.
+"""New mails from the watch folder, one .eml file per mail.
 
-The flow (see the README) exports every mail from the configured senders to OneDrive; the OneDrive app syncs
-that folder to this laptop. So reading mail is reading files: no mailbox login, no tokens.
+A Power Automate flow (see the README) exports every mail from the configured senders; gmail.py, or a synced
+OneDrive folder, puts the files here. So reading mail is reading files.
 """
 import html
 import re
@@ -44,7 +44,7 @@ def read_eml(path: Path) -> Mail:
         message_id=str(msg["Message-ID"] or path.name).strip(),
         sender=parseaddr(str(msg["From"] or ""))[1].lower(),
         received=received,
-        subject=str(msg["Subject"] or ""),
+        subject=str(msg["Subject"] or "").strip(),  # Exchange folds it right after "Subject:", leaving a tab
         text=text,
         path=path,
     )

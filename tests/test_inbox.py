@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime, timezone
 from email.message import EmailMessage
 
@@ -32,6 +33,13 @@ def test_html_only_mail_becomes_readable_text(tmp_path):
     html = "<div>Görev ve sorumluluklar</div><ul><li>Bilgisayar kurulumları</li><li>Ram &amp; disk</li></ul>"
     m = read_eml(write_eml(tmp_path, "a.eml", html=html))
     assert m.text.splitlines() == ["Görev ve sorumluluklar", "Bilgisayar kurulumları", "Ram & disk"]
+
+
+def test_a_subject_folded_the_exchange_way_is_read_clean(tmp_path):
+    word = lambda s: "=?utf-8?B?" + base64.b64encode(s.encode()).decode() + "?="  # noqa: E731
+    raw = f"Subject:\r\n\t{word('COOP:// Örnek - Yaz Pro')}\r\n {word('gramı')}\r\nFrom: coop@coop.bau.edu.tr\r\n\r\nx"
+    (tmp_path / "a.eml").write_bytes(raw.encode())
+    assert read_eml(tmp_path / "a.eml").subject == "COOP:// Örnek - Yaz Programı"
 
 
 def test_missing_message_id_falls_back_to_the_file_name(tmp_path):
