@@ -6,7 +6,7 @@ OneDrive folder, puts the files here. So reading mail is reading files.
 import html
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from email import policy
 from email.parser import BytesParser
 from email.utils import parseaddr
@@ -39,7 +39,11 @@ def read_eml(path: Path) -> Mail:
     body = msg.get_body(preferencelist=("plain", "html"))
     content = body.get_content() if body else ""
     text = html_to_text(content) if body and body.get_content_subtype() == "html" else content.strip()
-    received = msg["Date"].datetime if msg["Date"] else datetime.fromtimestamp(path.stat().st_mtime).astimezone()
+    received = msg["Date"].datetime if msg["Date"] else None  # None when the header cannot be parsed
+    if received is None:
+        received = datetime.fromtimestamp(path.stat().st_mtime).astimezone()
+    elif received.tzinfo is None:  # "-0000" parses without a zone, and new_mails cannot sort that among the others
+        received = received.replace(tzinfo=timezone.utc)
     return Mail(
         message_id=str(msg["Message-ID"] or path.name).strip(),
         sender=parseaddr(str(msg["From"] or ""))[1].lower(),

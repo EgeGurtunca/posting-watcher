@@ -54,6 +54,15 @@ def test_new_mails_skips_seen_ones_and_sorts_by_time(tmp_path):
     assert [m.message_id for m in new_mails(tmp_path, seen={"<old>"})] == ["<early>", "<late>"]
 
 
+def test_a_broken_or_zoneless_date_does_not_stop_the_sort(tmp_path):
+    write_eml(tmp_path, "good.eml", message_id="<good>", plain="x")
+    write_eml(tmp_path, "broken.eml", message_id="<broken>", date="not a date", plain="x")
+    write_eml(tmp_path, "zoneless.eml", message_id="<zoneless>", date="Tue, 22 Sep 2026 10:00:00 -0000", plain="x")
+    mails = new_mails(tmp_path, seen=set())
+    assert [m.message_id for m in mails] == ["<zoneless>", "<good>", "<broken>"]  # broken: the file's time, i.e. now
+    assert mails[0].received == datetime(2026, 9, 22, 10, 0, tzinfo=timezone.utc)
+
+
 def test_the_same_mail_saved_twice_is_read_once(tmp_path):
     write_eml(tmp_path, "20261023-122350-a.eml", plain="x")
     write_eml(tmp_path, "20261023-124011-b.eml", plain="x")
