@@ -4,6 +4,7 @@ Reads new mail files, notifies technical postings, sends the 21:00 digest and th
 turns any failure into a Telegram alert, because a watcher that fails silently looks exactly like a quiet week.
 """
 import os
+import socket
 import subprocess
 import time
 import traceback
@@ -124,6 +125,18 @@ def alert(store: Store, now: datetime, err: Exception) -> None:
         store.set(key, day)
 
 
+def online(host: str = "api.telegram.org", tries: int = 12, wait: float = 10) -> bool:
+    """Runs at logon or wake start before Wi-Fi is up: wait up to 2 minutes for DNS instead of failing."""
+    for i in range(tries):
+        try:
+            socket.getaddrinfo(host, 443)
+            return True
+        except OSError:
+            if i < tries - 1:
+                time.sleep(wait)
+    return False
+
+
 def run_once(store: Store, folder: Path, senders: set[str], now: datetime) -> None:
     if not folder.is_dir():  # an unsynced folder would otherwise look like "no new mail" forever
         raise FileNotFoundError(f"watch folder not found: {folder}")
@@ -149,6 +162,10 @@ def main() -> None:
         with open(DATA / "watcher.log", "a", encoding="utf-8") as f:
             f.write(f"{now.isoformat()}\n{traceback.format_exc()}\n")
 
+    if not online():  # no alert could go out anyway, and the next hourly run catches up
+        with open(DATA / "watcher.log", "a", encoding="utf-8") as f:
+            f.write(f"{now.isoformat()} offline, skipped\n")
+        return
     try:
         folder = Path(os.environ["WATCH_FOLDER"])  # KeyError if unset: an alert, not "."
         if os.environ.get("GMAIL_USER"):

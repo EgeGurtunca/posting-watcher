@@ -140,3 +140,16 @@ def test_long_messages_are_cut_to_telegrams_limit(monkeypatch):
     monkeypatch.setattr(notify.urllib.request, "urlopen", fake_urlopen)
     notify.send("x" * 10_000)
     assert len(sent["text"][0]) <= notify.MAX_CHARS and sent["text"][0].endswith("(kısaltıldı)")
+
+
+def test_online_waits_for_dns_then_gives_up(monkeypatch):
+    answers, sleeps = [OSError(), OSError(), None], []
+    def lookup(*_a):
+        if (a := answers.pop(0)) is not None:
+            raise a
+    monkeypatch.setattr(run.socket, "getaddrinfo", lookup)
+    monkeypatch.setattr(run.time, "sleep", sleeps.append)
+    assert run.online(tries=5, wait=10) and sleeps == [10, 10]
+    monkeypatch.setattr(run.socket, "getaddrinfo", lambda *_a: (_ for _ in ()).throw(OSError()))
+    sleeps.clear()
+    assert not run.online(tries=3, wait=10) and sleeps == [10, 10]
