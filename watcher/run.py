@@ -82,10 +82,21 @@ def process(mail: Mail, store: Store, now: datetime) -> None:
     store.save(mail, rows, now)
 
 
+def game_running() -> bool:
+    """A process started from a game folder holds the GPU. GAME_DIRS in .env, comma-separated; default Steam's."""
+    if not IS_WINDOWS:
+        return False
+    dirs = [d.strip().lower() for d in os.environ.get("GAME_DIRS", r"\steamapps\common").split(",") if d.strip()]
+    paths = subprocess.run(["powershell", "-NoProfile", "-Command", "(Get-CimInstance Win32_Process).ExecutablePath"],
+                           capture_output=True, text=True, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)).stdout
+    return any(d in paths.lower() for d in dirs)
+
+
 def model_due(now: datetime) -> bool:
-    """READ_AFTER=21 in .env: posting mails wait until 21:00, so the GPU stays free all day. Unset: every run."""
+    """READ_AFTER=21 in .env: posting mails wait until 21:00, so the GPU stays free all day. Unset: every run.
+    Either way they also wait while a game is running, and the first run after it reads them."""
     after = os.environ.get("READ_AFTER", "").strip()
-    return not after or now.hour >= int(after)
+    return (not after or now.hour >= int(after)) and not game_running()
 
 
 def digest(store: Store, now: datetime) -> None:

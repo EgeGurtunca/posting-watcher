@@ -26,6 +26,7 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setattr(notify, "send", sent.append)
     monkeypatch.setattr(extract, "extract", lambda subject, text: [IT] if "IT" in subject else [replace(IT, technical=False)])
     monkeypatch.setattr(run, "ollama", nullcontext)
+    monkeypatch.setattr(run, "game_running", lambda: False)
     return inbox, Store(tmp_path / "w.db"), sent
 
 
@@ -96,6 +97,19 @@ def test_read_after_21_keeps_posting_mails_waiting_until_the_evening(env, monkey
     run.run_once(store, inbox, {COOP}, NOW)  # 17:00: fetched, not read
     assert sent == [] and store.seen() == set()
     run.run_once(store, inbox, {COOP}, NOW.replace(hour=21, minute=11))
+    assert sent[0].startswith("🆕 CO-OP · IT Cooper") and sent[1].startswith("📋 Bugünün özeti: 1 teknik ilan")
+
+
+def test_mail_and_digest_wait_while_a_game_is_running(env, monkeypatch):
+    inbox, store, sent = env
+    monkeypatch.setattr(run, "ollama", lambda: (_ for _ in ()).throw(AssertionError("ollama started")))
+    monkeypatch.setattr(run, "game_running", lambda: True)
+    write_eml(inbox, "a.eml", subject="COOP:// Örnek - IT Cooper", sender=COOP, plain="x")
+    run.run_once(store, inbox, {COOP}, NOW.replace(hour=21))
+    assert sent == [] and store.seen() == set()
+    monkeypatch.setattr(run, "ollama", nullcontext)
+    monkeypatch.setattr(run, "game_running", lambda: False)
+    run.run_once(store, inbox, {COOP}, NOW.replace(hour=22))
     assert sent[0].startswith("🆕 CO-OP · IT Cooper") and sent[1].startswith("📋 Bugünün özeti: 1 teknik ilan")
 
 

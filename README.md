@@ -156,6 +156,10 @@ To keep the GPU free during the day, put `READ_AFTER=21` in `.env`: the hourly r
 posting mails wait until the first run after 21:00, which reads them all with one model load, sends the
 messages and then the digest. Remove the line to go back to reading every hour.
 
+The mails and the digest also wait while a game is running, so the model never loads in the middle of one: any
+process started from a `\steamapps\common` folder counts. Other launchers go in `GAME_DIRS` in `.env`, as a
+comma-separated list of path parts (for example `\steamapps\common,\Epic Games`).
+
 ## Tests
 
 ```bash
