@@ -166,13 +166,13 @@ comma-separated list of path parts (for example `\steamapps\common,\Epic Games`)
 pytest
 ```
 
-44 tests, no network: every deadline phrasing from the three months of mail, the notify rule, reading
+47 tests, no network: every deadline phrasing from the three months of mail, the notify rule, reading
 plain and HTML-only `.eml` files (a subject folded the Exchange way, the same mail saved twice, read once),
 the Gmail bridge against a fake IMAP server (attachments saved before the mail is marked read, only `.eml`
 files, no file names that escape the folder), the extraction schema, the baseline, the eval scoring, and the
 run loop with fakes for the model and Telegram (a posting is notified once, a crash leaves the mail unread
 for the next run, a missing folder is an error, the model is not started when there is no new mail,
-`READ_AFTER` keeps posting mails waiting until the evening, the digest and the heartbeat go out once, a
+`READ_AFTER` keeps posting mails waiting until the evening, a running game holds them back too, the digest and the heartbeat go out once, a
 message longer than Telegram's 4096-character limit is cut instead of refused, Ollama is stopped with its
 children).
 
