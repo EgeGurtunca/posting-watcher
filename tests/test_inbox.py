@@ -2,7 +2,7 @@ import base64
 from datetime import datetime, timezone
 from email.message import EmailMessage
 
-from watcher.inbox import new_mails, read_eml
+from watcher.inbox import html_to_text, new_mails, read_eml
 
 
 def write_eml(folder, name, *, subject="COOP:// X - IT Cooper", sender="Coop <coop@coop.bau.edu.tr>",
@@ -67,3 +67,9 @@ def test_the_same_mail_saved_twice_is_read_once(tmp_path):
     write_eml(tmp_path, "20261023-122350-a.eml", plain="x")
     write_eml(tmp_path, "20261023-124011-b.eml", plain="x")
     assert [m.message_id for m in new_mails(tmp_path, seen=set())] == ["<a1@bau>"]
+
+
+def test_outlook_conditional_comments_do_not_leak_into_the_text():
+    markup = ("<head><!--[if gte mso 9]><xml><o:PixelsPerInch>96</o:PixelsPerInch></xml><![endif]--></head>"
+              "<body><p>Intern posting</p><!-- tracking --><p>Apply by 30 November</p></body>")
+    assert html_to_text(markup) == "Intern posting\nApply by 30 November"

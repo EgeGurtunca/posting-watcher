@@ -14,7 +14,7 @@ from pathlib import Path
 
 BLOCK_END = re.compile(r"<\s*(br|/p|/div|/li|/tr|/h\d)\b[^>]*>", re.IGNORECASE)
 TAG = re.compile(r"<[^>]+>")
-SKIP = re.compile(r"<(style|script)\b.*?</\1>", re.IGNORECASE | re.DOTALL)
+SKIP = re.compile(r"<!--.*?-->|<(style|script)\b.*?</\1>", re.IGNORECASE | re.DOTALL)
 
 
 @dataclass(frozen=True)
