@@ -172,9 +172,9 @@ the Gmail bridge against a fake IMAP server (attachments saved before the mail i
 files, no file names that escape the folder), the extraction schema, the baseline, the eval scoring, and the
 run loop with fakes for the model and Telegram (a posting is notified once, a crash leaves the mail unread
 for the next run, a missing folder is an error, the model is not started when there is no new mail,
-`READ_AFTER` keeps posting mails waiting until the evening, a running game holds them back too, the digest and the heartbeat go out once, a
-message longer than Telegram's 4096-character limit is cut instead of refused, Ollama is stopped with its
-children).
+`READ_AFTER` keeps posting mails waiting until the evening, a running game holds them back too, the digest
+and the heartbeat go out once, a message longer than Telegram's 4096-character limit is cut instead of
+refused, Ollama is stopped with its children).
 
 ## What's next
 
