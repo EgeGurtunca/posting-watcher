@@ -166,7 +166,8 @@ comma-separated list of path parts (for example `\steamapps\common,\Epic Games`)
 pytest
 ```
 
-48 tests, no network: every deadline phrasing from the three months of mail, the notify rule, reading
+49 tests, no network: every deadline phrasing from the three months of mail (an impossible date like
+31.02 is skipped, not a crash), the notify rule, reading
 plain and HTML-only `.eml` files (Outlook's conditional comments kept out of the text, a subject folded
 the Exchange way, the same mail saved twice, read once),
 the Gmail bridge against a fake IMAP server (attachments saved before the mail is marked read, only `.eml`

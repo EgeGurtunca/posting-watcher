@@ -49,20 +49,23 @@ def parse_deadline(text: str | None, received: date) -> date | None:
     if not text:
         return None
     t = tr_lower(text)
-    if m := NUMERIC.search(t):
-        d = date(int(m[3]), int(m[2]), int(m[1]))
-    elif m := WORDS.search(t):
-        day, month_name, year, weekday = m.groups()
-        month = MONTHS.index(month_name) + 1
-        if day and year:
-            d = date(int(year), month, int(day))
-        elif day:
-            d = _nearest(int(day), month, received)
-        elif weekday:
-            d = _first_weekday(WEEKDAYS.index(weekday), month, received)
+    try:
+        if m := NUMERIC.search(t):
+            d = date(int(m[3]), int(m[2]), int(m[1]))
+        elif m := WORDS.search(t):
+            day, month_name, year, weekday = m.groups()
+            month = MONTHS.index(month_name) + 1
+            if day and year:
+                d = date(int(year), month, int(day))
+            elif day:
+                d = _nearest(int(day), month, received)
+            elif weekday:
+                d = _first_weekday(WEEKDAYS.index(weekday), month, received)
+            else:
+                return None
         else:
             return None
-    else:
+    except ValueError:  # "31.02.2026" is a typo in the mail; skip the deadline instead of crashing the run
         return None
     if d and "önce" in t:
         d -= timedelta(days=1)

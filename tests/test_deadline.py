@@ -43,3 +43,8 @@ def test_no_date():
     assert parse_deadline("Ücret görüşmede netleşecek", date(2026, 9, 1)) is None
     assert parse_deadline(None, date(2026, 9, 1)) is None
     assert parse_deadline("Eylül tarihinden önce", date(2026, 9, 1)) is None  # neither a day nor a weekday
+
+
+def test_impossible_date_is_none_not_a_crash():
+    assert parse_deadline("Son başvuru tarihi: 31.02.2026", date(2026, 2, 1)) is None
+    assert parse_deadline("31 Şubat 2026 tarihine kadar", date(2026, 2, 1)) is None
